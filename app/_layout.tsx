@@ -1,39 +1,35 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
+import { View, Text } from 'react-native'
+import * as Location from 'expo-location'
+import { useEffect, useState } from 'react'
 
-import { useColorScheme } from '@/hooks/useColorScheme';
+const _layout = () => {
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
-
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
+  const [location, setLocation] = useState<Location.LocationObject | null>();
 
   useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
+    const getPermissions = async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
 
-  if (!loaded) {
-    return null;
-  }
+      if(status !== "granted"){
+        console.log("Debe otorgar permisos de ubicación")
+        return;
+      }
+
+      let currentLocation = await Location.getCurrentPositionAsync({});
+      setLocation(currentLocation);
+      console.log("Location:", currentLocation)
+    };
+
+    getPermissions()
+
+  }, [])
+  
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
-  );
+    <View>
+      <Text>_layout</Text>
+    </View>
+  )
 }
+
+export default _layout
